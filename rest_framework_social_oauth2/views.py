@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import json
 
+from django.conf import settings
+
 from braces.views import CsrfExemptMixin
 from oauthlib.oauth2.rfc6749.endpoints.token import TokenEndpoint
 from oauth2_provider.oauth2_backends import OAuthLibCore
@@ -16,6 +18,15 @@ from rest_framework.views import APIView
 
 from .oauth2_backends import KeepRequestCore
 from .oauth2_endpoints import SocialTokenServer
+
+#adds client_id and client_secret to the request
+#import client_id and client_secret from os.environ
+def update_request(request):
+    # Use the rest framework `.data` to fake the post body of the django request.
+    request._request.POST = request._request.POST.copy()
+    request._request.POST['client_id'] = settings.CLIENT_ID
+    request._request.POST['client_secret'] = settings.CLIENT_SECRET
+    return request
 
 
 class TokenView(CsrfExemptMixin, OAuthLibMixin, APIView):
@@ -34,8 +45,8 @@ class TokenView(CsrfExemptMixin, OAuthLibMixin, APIView):
     permission_classes = (permissions.AllowAny,)
 
     def post(self, request, *args, **kwargs):
-        # Use the rest framework `.data` to fake the post body of the django request.
-        request._request.POST = request._request.POST.copy()
+        #modify request and add client id and client seceret
+        request = update_request(request)
         for key, value in request.data.items():
             request._request.POST[key] = value
 
@@ -62,8 +73,8 @@ class ConvertTokenView(CsrfExemptMixin, OAuthLibMixin, APIView):
     permission_classes = (permissions.AllowAny,)
 
     def post(self, request, *args, **kwargs):
-        # Use the rest framework `.data` to fake the post body of the django request.
-        request._request.POST = request._request.POST.copy()
+        #modify request and add client id and client seceret
+        request = update_request(request)
         for key, value in request.data.items():
             request._request.POST[key] = value
 
@@ -85,8 +96,8 @@ class RevokeTokenView(CsrfExemptMixin, OAuthLibMixin, APIView):
     permission_classes = (permissions.AllowAny,)
 
     def post(self, request, *args, **kwargs):
-        # Use the rest framework `.data` to fake the post body of the django request.
-        request._request.POST = request._request.POST.copy()
+        #modify request and add client id and client seceret
+        request = update_request(request)
         for key, value in request.data.items():
             request._request.POST[key] = value
 
